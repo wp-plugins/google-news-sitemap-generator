@@ -1,9 +1,9 @@
 <?
 /* 
 Plugin Name: Google News Sitemap
-Plugin URI: http://southcoastwebsites.com/wordpress/
+Plugin URI: http://southcoastwebsites.co.uk/wordpress/
 Version: v1.1
-Author: <a href="http://southcoastwebsites.com/wordpress/">Chris Jinks</a>
+Author: <a href="http://southcoastwebsites.co.uk/wordpress/">Chris Jinks</a>
 Description: Basic XML sitemap generator for submission to Google News 
 
 
