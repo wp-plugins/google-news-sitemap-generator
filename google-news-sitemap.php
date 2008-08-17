@@ -2,9 +2,26 @@
 /* 
 Plugin Name: Google News Sitemap
 Plugin URI: http://southcoastwebsites.com/wordpress/
-Version: v1.00
+Version: v1.1
 Author: <a href="http://southcoastwebsites.com/wordpress/">Chris Jinks</a>
 Description: Basic XML sitemap generator for submission to Google News 
+
+
+Installation:
+==============================================================================
+	1. Upload `google-news-sitemap-generator` directory to the `/wp-content/plugins/` directory
+	2. Activate the plugin through the 'Plugins' menu in WordPress
+	3. Create file "google-news-sitemap.xml" in your root directory and CHMOD so it is writable
+
+
+Release History:
+==============================================================================
+	2008-08-04		v1.00		First release
+	2008-08-17		v1.1		Compatible with new Wordpress database taxonomy (>2.3)
+
+
+
+ 
 */
 
 /*  Copyright 2008 Chris Jinks / David Stansbury
@@ -30,15 +47,42 @@ Description: Basic XML sitemap generator for submission to Google News
 function get_category_keywords($newsID)
 {
 	global $wpdb;
-	$categories = $wpdb->get_results("SELECT category_id FROM $wpdb->post2cat WHERE post_id=$newsID");
-	$i = 0;
-	$categoryKeywords = "";
-	foreach ($categories as $category)
-	{
-		if ($i>0){$categoryKeywords.= ", ";} //Comma seperator
-		$categoryKeywords.= get_catname($category->category_id); //ammed string
-		$i++;
-	}
+	
+	
+	//Old Wordpress database taxonomy
+	if ( get_bloginfo('version') > 2.3 )
+		{
+			$categories = $wpdb->get_results("SELECT category_id FROM $wpdb->post2cat WHERE post_id=$newsID");
+			$i = 0;
+			$categoryKeywords = "";
+			foreach ($categories as $category)
+			{
+				if ($i>0){$categoryKeywords.= ", ";} //Comma seperator
+				$categoryKeywords.= get_catname($category->category_id); //ammed string
+				$i++;
+			}
+		}
+		
+	//New >2.3 Wordpress taxonomy	
+	else
+		{
+			$categories = $wpdb->get_results("
+				SELECT wp_terms.name FROM `wp_term_relationships`,  `wp_term_taxonomy`,  `wp_terms`
+				WHERE wp_term_relationships.term_taxonomy_id = wp_term_taxonomy.term_taxonomy_id
+				AND wp_term_taxonomy.term_id =  wp_terms.term_id
+				AND wp_term_relationships.object_id = $newsID
+				AND wp_term_taxonomy.taxonomy = 'category'");
+			$i = 0;
+			$categoryKeywords = "";
+			foreach ($categories as $category)
+			{
+				if ($i>0){$categoryKeywords.= ", ";} //Comma seperator
+				$categoryKeywords.= $category->name; //ammed string
+				$i++;
+			}
+		}
+	
+	
 	return $categoryKeywords; //Return post category names as keywords
 }
 

@@ -15,15 +15,15 @@ Follows Google guidelines:
 * 1000 item limit
 * Posts from the last 3 days
 
+Keywords for sitemap are auto generated from post category.
+
 
 
 == Installation ==
 
 This section describes how to install the plugin and get it working.
 
-e.g.
-
-1. Upload `plugin-name.php` to the `/wp-content/plugins/` directory
+1. Upload `google-news-sitemap-generator` directory to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Create file "google-news-sitemap.xml" in your root directory and CMOD so it is writable
+3. Create file "google-news-sitemap.xml" in your root directory and CHMOD so it is writable
 
