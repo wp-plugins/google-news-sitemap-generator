@@ -67,11 +67,11 @@ function get_category_keywords($newsID)
 	else
 		{
 			$categories = $wpdb->get_results("
-				SELECT wp_terms.name FROM `wp_term_relationships`,  `wp_term_taxonomy`,  `wp_terms`
-				WHERE wp_term_relationships.term_taxonomy_id = wp_term_taxonomy.term_taxonomy_id
-				AND wp_term_taxonomy.term_id =  wp_terms.term_id
-				AND wp_term_relationships.object_id = $newsID
-				AND wp_term_taxonomy.taxonomy = 'category'");
+				SELECT $wpdb->terms.name FROM $wpdb->term_relationships,  $wpdb->term_taxonomy,  $wpdb->terms
+				WHERE $wpdb->term_relationships.term_taxonomy_id = $wpdb->term_taxonomy.term_taxonomy_id
+				AND $wpdb->term_taxonomy.term_id =  $wpdb->terms.term_id
+				AND $wpdb->term_relationships.object_id = $newsID
+				AND $wpdb->term_taxonomy.taxonomy = 'category'");
 			$i = 0;
 			$categoryKeywords = "";
 			foreach ($categories as $category)
