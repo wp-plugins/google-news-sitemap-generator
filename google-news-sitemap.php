@@ -48,9 +48,27 @@ function get_category_keywords($newsID)
 {
 	global $wpdb;
 	
-	
+	//New >2.3 Wordpress taxonomy	
+	if ( get_bloginfo('version') >= 2.3 )
+		{
+			$categories = $wpdb->get_results("
+					SELECT $wpdb->terms.name FROM $wpdb->term_relationships,  $wpdb->term_taxonomy,  $wpdb->terms
+					WHERE $wpdb->term_relationships.term_taxonomy_id = $wpdb->term_taxonomy.term_taxonomy_id
+					AND $wpdb->term_taxonomy.term_id =  $wpdb->terms.term_id
+					AND $wpdb->term_relationships.object_id = $newsID
+					AND $wpdb->term_taxonomy.taxonomy = 'category'");
+				$i = 0;
+				$categoryKeywords = "";
+				foreach ($categories as $category)
+				{
+					if ($i>0){$categoryKeywords.= ", ";} //Comma seperator
+					$categoryKeywords.= $category->name; //ammed string
+					$i++;
+				}
+		}
+		
 	//Old Wordpress database taxonomy
-	if ( get_bloginfo('version') > 2.3 )
+	else
 		{
 			$categories = $wpdb->get_results("SELECT category_id FROM $wpdb->post2cat WHERE post_id=$newsID");
 			$i = 0;
@@ -59,25 +77,6 @@ function get_category_keywords($newsID)
 			{
 				if ($i>0){$categoryKeywords.= ", ";} //Comma seperator
 				$categoryKeywords.= get_catname($category->category_id); //ammed string
-				$i++;
-			}
-		}
-		
-	//New >2.3 Wordpress taxonomy	
-	else
-		{
-			$categories = $wpdb->get_results("
-				SELECT $wpdb->terms.name FROM $wpdb->term_relationships,  $wpdb->term_taxonomy,  $wpdb->terms
-				WHERE $wpdb->term_relationships.term_taxonomy_id = $wpdb->term_taxonomy.term_taxonomy_id
-				AND $wpdb->term_taxonomy.term_id =  $wpdb->terms.term_id
-				AND $wpdb->term_relationships.object_id = $newsID
-				AND $wpdb->term_taxonomy.taxonomy = 'category'");
-			$i = 0;
-			$categoryKeywords = "";
-			foreach ($categories as $category)
-			{
-				if ($i>0){$categoryKeywords.= ", ";} //Comma seperator
-				$categoryKeywords.= $category->name; //ammed string
 				$i++;
 			}
 		}
