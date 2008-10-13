@@ -200,11 +200,6 @@ else  //Friendly error message :)
 	4. Save/publish/delete a post to generate the sitemap</p>
 	<?
 }
-?>
-
-
-<?
-
 //
 // Admin panel options.... //
 //
@@ -222,10 +217,9 @@ function show_googlenewssitemap_options() {
 	add_option('googlenewssitemap_tagkeywords', 'off');
 	
 }
-
-
-// Admin page HTML
-
+//
+// Admin page HTML //
+//
 function googlenewssitemap_options() { ?>
 <style type="text/css">
 div.headerWrap { background-color:#e4f2fds; width:200px}
