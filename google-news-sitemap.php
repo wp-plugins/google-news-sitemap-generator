@@ -1,9 +1,9 @@
 <?
 /* 
 Plugin Name: Google News Sitemap
-Plugin URI: http://southcoastwebsites.co.uk/wordpress/
-Version: v1.2
-Author: <a href="http://southcoastwebsites.co.uk/wordpress/">Chris Jinks</a>
+Plugin URI: http://www.southcoastwebsites.co.uk/wordpress/
+Version: v1.3
+Author: <a href="http://www.southcoastwebsites.co.uk/wordpress/">Chris Jinks</a>
 Description: Basic XML sitemap generator for submission to Google News 
 
 
@@ -20,7 +20,7 @@ Release History:
 	2008-08-04		v1.00		First release
 	2008-08-17		v1.1		Compatible with new Wordpress database taxonomy (>2.3)
 	2008-10-11		v1.2		Improved installation instructions, admin panel, general bug fixing
-
+	2009-07-27		v1.3		Exclude category options, scheduled posts now supported, UI improved.
 
  
 */
@@ -129,6 +129,7 @@ function write_google_news_sitemap()
 			xmlns:news=\"http://www.google.com/schemas/sitemap-news/0.9\">\n";
 	
 	
+	//Show either Posts or Pages or Both
 	if (get_option('googlenewssitemap_includePages') == 'on' && get_option('googlenewssitemap_includePosts') == 'on')
 		$includeMe = 'AND (post_type="page" OR post_type = "post")';
 	
@@ -137,7 +138,14 @@ function write_google_news_sitemap()
 	
 	elseif (get_option('googlenewssitemap_includePosts') == 'on')
 		$includeMe = 'AND post_type="post"';
-
+	
+	
+	//Exclude categories	
+	if (get_option('googlenewssitemap_excludeCat')<>NULL)
+	{
+		$exPosts = get_objects_in_term(get_option('googlenewssitemap_excludeCat'),"category");
+		$includeMe.= ' AND ID NOT IN ('.implode(",",$exPosts).')';
+	}
 	
 	//Limit to last 3 days, 1000 items					
 	$rows = $wpdb->get_results("SELECT ID, post_date_gmt
@@ -187,6 +195,13 @@ if(function_exists('add_action')) //Stop error when directly accessing the PHP f
 	add_action('publish_post', 'write_google_news_sitemap');
 	add_action('save_post', 'write_google_news_sitemap');
 	add_action('delete_post', 'write_google_news_sitemap');
+	add_action('transition_post_status', 'write_google_news_sitemap',10, 3); //Future scheduled post action fix
+	
+	//Any changes to the settings are executed on change
+	add_action('update_option_googlenewssitemap_includePosts', 'write_google_news_sitemap', 10, 2);
+	add_action('update_option_googlenewssitemap_includePages', 'write_google_news_sitemap', 10, 2);
+	add_action('update_option_googlenewssitemap_tagkeywords', 'write_google_news_sitemap', 10, 2);
+	add_action('update_option_googlenewssitemap_excludeCat', 'write_google_news_sitemap', 10, 2);
 }
 else  //Friendly error message :)
 {
@@ -215,6 +230,7 @@ function show_googlenewssitemap_options() {
 	add_option('googlenewssitemap_includePosts', 'on');
 	add_option('googlenewssitemap_includePages', 'off');
 	add_option('googlenewssitemap_tagkeywords', 'off');
+	add_option('googlenewssitemap_excludeCat', '');
 	
 }
 //
@@ -223,76 +239,107 @@ function show_googlenewssitemap_options() {
 function googlenewssitemap_options() { ?>
 <style type="text/css">
 div.headerWrap { background-color:#e4f2fds; width:200px}
-#options h3 { padding:7px; margin-top:10px; }
-#options label { width: 200px; float: left; margin-left: 10px; }
+#options h3 { padding:7px; padding-top:10px; margin:0px; cursor:auto }
+#options label { width: 300px; float: left; margin-left: 10px; }
 #options input { float: left; margin-left:10px}
 #options p { clear: both; padding-bottom:10px; }
+#options .postbox { margin:0px 0px 10px 0px; padding:0px; }
 </style>
 <div class="wrap">
 <form method="post" action="options.php" id="options">
 <?php wp_nonce_field('update-options') ?>
 <h2>Google News Sitemap Options</h2>
 
-<div id="poststuff" style="float:right;width:220px;margin-left:10px; margin-left:-230px;">
-<h3>Information</h3>
-	<div id="dbx-content" style="text-decoration:none;">
-		<a href="http://wordpress.org/extend/plugins/google-news-sitemap-generator/" style="text-decoration:none">Wordpress plugin page</a><br /><br />
-		<a href="http://www.southcoastwebsites.co.uk/wordpress/" style="text-decoration:none">Plugin homepage</a><br />
-<br />
+
+<div class="postbox">
+<h3 class="hndle">Information</h3>
+	<div style="text-decoration:none; padding:10px">
+	
+	<div style="width:180px; text-align:center; float:right; font-size:10px; font-weight:bold">
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=396299">
-<img src="https://www.paypal.com/en_GB/i/btn/btn_donateCC_LG.gif" border="0" style="padding-left:10px" /></a><br />
-Thank you for your support!
-	</div>
+<img src="https://www.paypal.com/en_GB/i/btn/btn_donateCC_LG.gif" border="0" style="padding-bottom:10px" /></a><br />
+Please donate to keep this plugin alive and for future updates! Thanks! :)
 </div>
 
-<div style="float:left; margin-right:230px">
+	<a href="http://wordpress.org/extend/plugins/google-news-sitemap-generator/" style="text-decoration:none" target="_blank">Google News Sitemap Generator homepage</a> <small>- Report a bug or suggest a feature</small><br /><br />
 
-<div id="poststuff">
-<h3>Sitemap contents</h3>
+	<a href="http://www.google.com/webmasters/tools/" style="text-decoration:none" target="_blank">Google Webmaster Tools</a> <small>- Submit Google News sitemap</small> <br /><br />
+
+<a href="http://www.google.com/support/news_pub/bin/answer.py?answer=74288&topic=11666" style="text-decoration:none" target="_blank">Google News Sitemap Guidelines</a> <small>- Detailed outline of sitemaps specification</small><br />
+<br />
+		
+		<a href="http://www.southcoastwebsites.co.uk/wordpress/" style="text-decoration:none" target="_blank">Plugin developer page</a> <small>- More information about the developer of this plugin</small><br />
+		
 </div>
+</div>
+
+
+
+<div class="postbox">
+<h3 class="hndle">Sitemap contents</h3>
 
 		<p>
 			<?php
 				if (get_option('googlenewssitemap_includePosts') == 'on') {echo '<input type="checkbox" name="googlenewssitemap_includePosts" checked="yes" />';}
 				else {echo '<input type="checkbox" name="googlenewssitemap_includePosts" />';}
 			?>
-			<label>Include posts</label>
+			<label>Include posts in Google News sitemap <small>(Default)</small></label>
 		</p>
 		<p>
 			<?php
 				if (get_option('googlenewssitemap_includePages') == 'on') {echo '<input type="checkbox" name="googlenewssitemap_includePages" checked="yes" />';}
 				else {echo '<input type="checkbox" name="googlenewssitemap_includePages" />';}
 			?>
-			<label>Include pages</label>
+			<label>Include pages in Google News sitemap</label>
 		</p>
-		
-<br />
-<br />
-		
-<div id="poststuff">
-<h3>Sitemap keywords</h3>
+<br style="clear:both"/>			
 </div>
-
 		
+<div class="postbox">
+<h3 class="hndle">Sitemap keywords</h3>
 		<p>
 			<?php
 				if (get_option('googlenewssitemap_tagkeywords') == 'on') {echo '<input type="checkbox" name="googlenewssitemap_tagkeywords" checked="yes" />';}
 				else {echo '<input type="checkbox" name="googlenewssitemap_tagkeywords" />';}
 			?>
-			<label>Use post tags in keywords</label>
-		</p>		
+			<label>Use post tags as sitemap keywords <small><a href="http://www.google.com/support/news_pub/bin/answer.py?answer=74288&topic=11666" style="text-decoration:none" target="_blank">More Info</a></small></label>
+		</p>
+<br style="clear:both"/>		
+</div>
 
 
-<br />
-<br />
+<div class="postbox">
+<h3 class="hndle">Exclude categories</h3>
 
-<h4>After updating these options, please rebuild the Google News Sitemap by saving/editing/publishing a post or page.</h4>
+<div style="padding:10px">Select the categories you would like to <em><strong>exclude</strong></em> from the Google News Sitemap:</div>
+
+<div style="padding:10px">
+<?php
+  //Categories to exclude from sitemap
+  $excludedCats = get_option('googlenewssitemap_excludeCat');
+  $categories = get_categories('hide_empty=1');
+  foreach ($categories as $cat) {
+  	if (in_array($cat->cat_ID,$excludedCats))
+	{
+  		echo '<label class="selectit"><input type="checkbox" name="googlenewssitemap_excludeCat[\''.$cat->cat_ID.'\']" value="'.$cat->cat_ID.'" checked="yes" /><span style="padding-left:5px">'.$cat->cat_name.'</span></label>';
+  	}
+	else
+	{
+		echo '<label class="selectit"><input type="checkbox" name="googlenewssitemap_excludeCat[\''.$cat->cat_ID.'\']" value="'.$cat->cat_ID.'" /><span style="padding-left:5px">'.$cat->cat_name.'</span></label>';
+	}
+  }
+?>
+<br style="clear:both"/>
+</div>
+
+</div>
 		<input type="hidden" name="action" value="update" />
-		<input type="hidden" name="page_options" value="googlenewssitemap_includePosts,googlenewssitemap_includePages,googlenewssitemap_tagkeywords" />
-		<div style="clear:both;padding-top:20px;"></div>
+		<input type="hidden" name="page_options" value="googlenewssitemap_includePosts,googlenewssitemap_includePages,googlenewssitemap_tagkeywords,googlenewssitemap_excludeCat" />
+		<div style="clear:both;padding-top:0px;"></div>
 		<p class="submit"><input type="submit" name="Submit" value="<?php _e('Update Options') ?>" /></p>
 		<div style="clear:both;padding-top:20px;"></div>
 		</form>
+			
 </div>
-</div>
+
 <?php } ?>

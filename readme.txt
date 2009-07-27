@@ -1,7 +1,7 @@
 === Google News Sitemap Generator ===
 
 Contributors: Chris Jinks, David Stansbury
-Donate link: http://southcoastwebsites.co.uk/wordpress/
+Donate link: http://www.southcoastwebsites.co.uk/wordpress/
 Tags: Google News, Sitemap, XML
 
 Basic XML sitemap generator for submission to Google News.
@@ -16,6 +16,8 @@ Follows Google guidelines:
 * Posts from the last 3 days
 
 Keywords for sitemap are generated from post category and post tags.
+
+Optional categories can be excluded from Google News sitemap.
 
 
 
