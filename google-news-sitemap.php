@@ -317,6 +317,8 @@ Please donate to keep this plugin alive and for future updates! Thanks! :)
 <?php
   //Categories to exclude from sitemap
   $excludedCats = get_option('googlenewssitemap_excludeCat');
+  if (!is_array($excludedCats)) 
+  $excludedCats= array();
   $categories = get_categories('hide_empty=1');
   foreach ($categories as $cat) {
   	if (in_array($cat->cat_ID,$excludedCats))
