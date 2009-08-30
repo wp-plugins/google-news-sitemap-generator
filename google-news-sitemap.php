@@ -21,6 +21,7 @@ Release History:
 	2008-08-17		v1.1		Compatible with new Wordpress database taxonomy (>2.3)
 	2008-10-11		v1.2		Improved installation instructions, admin panel, general bug fixing
 	2009-07-27		v1.3		Exclude category options, scheduled posts now supported, UI improved.
+	2009-08-30		v1.3.1		Addition of XML version/encoding tag to beginning of sitemap
 
  
 */
@@ -125,7 +126,9 @@ function write_google_news_sitemap()
 	
 	
 	// Begin urlset
-	$xmlOutput = "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"
+	$xmlOutput = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+			
+	$xmlOutput.= "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"
 			xmlns:news=\"http://www.google.com/schemas/sitemap-news/0.9\">\n";
 	
 	
