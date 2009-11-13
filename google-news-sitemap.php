@@ -2,7 +2,7 @@
 /* 
 Plugin Name: Google News Sitemap
 Plugin URI: http://www.southcoastwebsites.co.uk/wordpress/
-Version: v1.3.1
+Version: v1.4
 Author: <a href="http://www.southcoastwebsites.co.uk/wordpress/">Chris Jinks</a>
 Description: Basic XML sitemap generator for submission to Google News 
 
@@ -22,6 +22,7 @@ Release History:
 	2008-10-11		v1.2		Improved installation instructions, admin panel, general bug fixing
 	2009-07-27		v1.3		Exclude category options, scheduled posts now supported, UI improved.
 	2009-08-30		v1.3.1		Addition of XML version/encoding tag to beginning of sitemap
+	2009-11-11		v1.4		Update to new Google News Sitemap format
 
  
 */
@@ -150,14 +151,14 @@ function write_google_news_sitemap()
 		$includeMe.= ' AND ID NOT IN ('.implode(",",$exPosts).')';
 	}
 	
-	//Limit to last 3 days, 1000 items					
-	$rows = $wpdb->get_results("SELECT ID, post_date_gmt
+	//Limit to last 2 days, 50,000 items					
+	$rows = $wpdb->get_results("SELECT ID, post_date_gmt, post_title
 						FROM $wpdb->posts 
 						WHERE post_status='publish' 
-						AND (DATEDIFF(CURDATE(), post_date_gmt)<=3)
+						AND (DATEDIFF(CURDATE(), post_date_gmt)<=2)
 						$includeMe
 						ORDER BY post_date_gmt DESC
-						LIMIT 0, 1000");	
+						LIMIT 0, 50000");	
 										
 	
 	// Output sitemap data
@@ -166,19 +167,30 @@ function write_google_news_sitemap()
 		$xmlOutput.= "\t\t<loc>";
 		$xmlOutput.= get_permalink($row->ID);
 		$xmlOutput.= "</loc>\n";
-		$xmlOutput.= "\t\t<news:news>\n";
-		$xmlOutput.= "\t\t<news:publication_date>";
+		$xmlOutput.= "\t\t<news>\n";
+		
+		$xmlOutput.= "\t\t\t<publication>\n";
+		$xmlOutput.= "\t\t\t\t<name>";
+		$xmlOutput.= htmlspecialchars(get_option('blogname'));
+		$xmlOutput.= "</name>\n";
+		$xmlOutput.= "\t\t\t\t<language>";
+		$xmlOutput.= get_option('rss_language');
+		$xmlOutput.= "</language>\n";
+		$xmlOutput.= "\t\t\t</publication>\n";
+		$xmlOutput.= "\t\t\t<publication_date>";
 		$thedate = substr($row->post_date_gmt, 0, 10);
-		$thetime = substr($row->post_date_gmt, 11, 20);
-		$xmlOutput.= $thedate . 'T' . $thetime . 'Z';
-		$xmlOutput.= "</news:publication_date>\n";
-		$xmlOutput.= "\t\t<news:keywords>";
+		$xmlOutput.= $thedate;
+		$xmlOutput.= "</publication_date>\n";
+		$xmlOutput.= "\t\t\t<title>";
+		$xmlOutput.= htmlspecialchars($row->post_title);
+		$xmlOutput.= "</title>\n";
+		$xmlOutput.= "\t\t\t<keywords>";
 		
 		//Use the categories for keywords
 		$xmlOutput.= get_category_keywords($row->ID);
 		
-		$xmlOutput.= "</news:keywords>\n"; 
-		$xmlOutput.= "\t\t</news:news>\n";
+		$xmlOutput.= "</keywords>\n"; 
+		$xmlOutput.= "\t\t</news>\n";
 		$xmlOutput.= "\t</url>\n";
 	}
 	

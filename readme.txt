@@ -12,12 +12,14 @@ Automatically generates a Google News XML sitemap for submission online via Webm
 
 Follows Google guidelines:
 
-* 1000 item limit
-* Posts from the last 3 days
+* 50,000 item limit
+* Posts from the last 2 days
 
 Keywords for sitemap are generated from post category and post tags.
 
 Optional categories can be excluded from Google News sitemap.
+
+Updated to conform with new Google News Sitemap format.
 
 
 
